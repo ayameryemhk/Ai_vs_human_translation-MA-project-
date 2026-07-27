@@ -1,0 +1,88 @@
+"""
+01_clean_data.py
+
+Reads the raw Google Forms export (data/raw/survey_responses_raw.xlsx),
+renames columns to short machine-friendly codes, and writes a cleaned,
+coded CSV to data/processed/survey_responses_clean.csv.
+
+The coded column names map to the variable dictionary in data/README.md,
+and to the item numbers of the original instrument in docs/questionnaire.pdf
+(Appendix A of the dissertation).
+"""
+
+import pandas as pd
+
+RAW_PATH = "data/raw/survey_responses_raw.xlsx"
+OUT_PATH = "data/processed/survey_responses_clean.csv"
+
+COLUMN_MAP = {
+    "Timestamp": "timestamp",
+    "Age:": "age_group",
+    "Gender:": "gender",
+    "Educational level?": "education_level",
+    "What's your field of study?": "field_of_study",
+    "What's your profession ? ": "profession_free_text",
+    "What's your language proficiency level?": "cefr_level",
+    "Have you ever worked as a professional translator or received formal translation training?": "formal_training_free_text",
+    "Have you ever used AI-powered translation tools (e.g., Google Translate,DeepL, ChatGPT, etc.)?": "ai_tool_ever_used",
+    "How often do you use Ai translation ?": "ai_use_frequency",
+    "Have you ever used human translation services (e.g., professional translators, freelancers, or agencies)?": "human_service_ever_used",
+    " Do you prefer AI translation or human translation? Why?  ": "q11_preference_why",
+    "How would you rate the accuracy of AI translation compared to human translation on a scale of 1-10?  ": "accuracy_score_1_10",
+    "Which method do you find faster, and does speed influence your preference?": "q13_speed_influence",
+    "How well do you think each method handles context and idiomatic expressions?": "q14_context_idioms",
+    "How satisfied are you with the results of AI translation versus human translation?  ": "satisfaction_score_1_5",
+    "Are you willing to pay more for human translation, and why?  ": "q16_willing_to_pay_why",
+    "What improvements would you suggest for AI translation tools?  ": "q17_suggested_improvements",
+    "How do you see the future of translation services, and which method do you think will dominate?": "q18_future_outlook",
+}
+
+
+def clean_field_of_study(val: str) -> str:
+    if not isinstance(val, str):
+        return val
+    mapping = {
+        "Linguistics and Applied languages": "Linguistics and Applied Languages",
+        "Literature and civilization": "Literature and Civilization",
+        "others": "Other Fields",
+    }
+    return mapping.get(val, val)
+
+
+def clean_ai_use_frequency(val: str) -> str:
+    if not isinstance(val, str):
+        return val
+    return "Sometimes" if val.strip().lower() == "somtimes" else val
+
+
+def main() -> None:
+    df = pd.read_excel(RAW_PATH)
+    df = df.rename(columns=COLUMN_MAP)
+
+    # Anonymized respondent ID (order of submission, no names were ever collected)
+    df.insert(0, "respondent_id", [f"R{str(i+1).zfill(2)}" for i in range(len(df))])
+
+    df["field_of_study"] = df["field_of_study"].apply(clean_field_of_study)
+    df["ai_use_frequency"] = df["ai_use_frequency"].apply(clean_ai_use_frequency)
+
+    # Formal training / professional experience recoded to binary Yes/No/Conditional
+    # per Table 3.6 of the dissertation (Chapter 3).
+    def code_training(val: str) -> str:
+        if not isinstance(val, str):
+            return "Missing"
+        v = val.strip().lower()
+        if v in {"no", "no, i haven't", "no i have not", "never did", "never"}:
+            return "No / Never"
+        if v in {"yes", "yes recently"}:
+            return "Yes / Conditional"
+        # free-text elaboration (e.g., volunteer training not used professionally)
+        return "Yes / Conditional"
+
+    df["formal_training_coded"] = df["formal_training_free_text"].apply(code_training)
+
+    df.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
+    print(f"Wrote {len(df)} rows x {len(df.columns)} columns to {OUT_PATH}")
+
+
+if __name__ == "__main__":
+    main()
