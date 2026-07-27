@@ -8,7 +8,6 @@ usable responses. No names, student IDs, or contact details were collected at an
 point, consistent with the informed-consent and anonymity procedures described in
 Chapter 2.5 of the dissertation.
 
-- `raw/survey_responses_raw.xlsx` — unmodified Google Forms export.
 - `processed/survey_responses_clean.csv` — same data, with columns renamed to
   short codes (see dictionary below) and two derived/coded columns added.
 
