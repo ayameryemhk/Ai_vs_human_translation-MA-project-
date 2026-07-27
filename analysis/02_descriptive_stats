@@ -1,0 +1,161 @@
+"""
+02_descriptive_stats.py
+
+Reproduces the frequency/percentage tables (3.1-3.11) and corresponding
+charts (3.1-3.11) from Chapter 3 of the dissertation, using the cleaned
+data at data/processed/survey_responses_clean.csv.
+
+Outputs:
+  results/tables/table_3_X_<name>.csv   (one per table)
+  results/figures/figure_3_X_<name>.png (one per chart)
+"""
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+
+IN_PATH = "data/processed/survey_responses_clean.csv"
+TABLES_DIR = "results/tables"
+FIGURES_DIR = "results/figures"
+
+plt.rcParams["font.family"] = "DejaVu Sans"
+COLORS = ["#4C72B0", "#DD8452", "#55A868", "#C44E52", "#8172B2", "#937860"]
+
+
+def freq_table(series: pd.Series, order=None) -> pd.DataFrame:
+    counts = series.value_counts(dropna=True)
+    if order:
+        counts = counts.reindex(order).dropna()
+    pct = (counts / counts.sum() * 100).round(2)
+    out = pd.DataFrame({"Frequency": counts.astype(int), "Percentage": pct})
+    out.loc["Total"] = [int(counts.sum()), 100.00]
+    return out
+
+
+def save_table(df: pd.DataFrame, name: str) -> None:
+    path = f"{TABLES_DIR}/{name}.csv"
+    df.to_csv(path)
+    print(f"  saved {path}")
+
+
+def pie(series: pd.Series, title: str, name: str, order=None) -> None:
+    counts = series.value_counts(dropna=True)
+    if order:
+        counts = counts.reindex(order).dropna()
+    plt.figure(figsize=(5, 5))
+    plt.pie(
+        counts,
+        labels=counts.index,
+        autopct="%1.1f%%",
+        colors=COLORS[: len(counts)],
+        startangle=90,
+    )
+    plt.title(title)
+    plt.tight_layout()
+    path = f"{FIGURES_DIR}/{name}.png"
+    plt.savefig(path, dpi=150)
+    plt.close()
+    print(f"  saved {path}")
+
+
+def bar(series: pd.Series, title: str, xlabel: str, name: str, order=None) -> None:
+    counts = series.value_counts(dropna=True)
+    if order:
+        counts = counts.reindex(order).dropna()
+    plt.figure(figsize=(6, 4))
+    bars = plt.bar(counts.index.astype(str), counts.values, color=COLORS[0])
+    for b, v in zip(bars, counts.values):
+        plt.text(b.get_x() + b.get_width() / 2, v + 0.2, str(int(v)),
+                  ha="center", fontsize=9)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel("Frequency")
+    plt.tight_layout()
+    path = f"{FIGURES_DIR}/{name}.png"
+    plt.savefig(path, dpi=150)
+    plt.close()
+    print(f"  saved {path}")
+
+
+def main() -> None:
+    df = pd.read_csv(IN_PATH)
+    print(f"Loaded {len(df)} responses\n")
+
+    print("Table 3.1 / Figure 3.1 — Age Distribution")
+    t = freq_table(df["age_group"], order=["Under 20 years", "20-27 years", "over 27 years"])
+    save_table(t, "table_3_1_age_distribution")
+    pie(df["age_group"], "Age Distribution of Respondents (N=32)", "figure_3_1_age_distribution",
+        order=["Under 20 years", "20-27 years", "over 27 years"])
+
+    print("Table 3.2 / Figure 3.2 — Gender Distribution")
+    t = freq_table(df["gender"], order=["Female", "Male"])
+    save_table(t, "table_3_2_gender_distribution")
+    pie(df["gender"], "Gender Distribution of Respondents (N=32)", "figure_3_2_gender_distribution",
+        order=["Female", "Male"])
+
+    print("Table 3.3 / Figure 3.3 — Educational Level")
+    t = freq_table(df["education_level"], order=["Master", "Licence", "PhD"])
+    save_table(t, "table_3_3_educational_level")
+    pie(df["education_level"], "Educational Level of Respondents (N=32)", "figure_3_3_educational_level",
+        order=["Master", "Licence", "PhD"])
+
+    print("Table 3.4 / Figure 3.4 — Field of Study")
+    t = freq_table(df["field_of_study"],
+                   order=["Linguistics and Applied Languages", "Literature and Civilization", "Other Fields"])
+    save_table(t, "table_3_4_field_of_study")
+    pie(df["field_of_study"], "Field of Study of Respondents (N=32)", "figure_3_4_field_of_study",
+        order=["Linguistics and Applied Languages", "Literature and Civilization", "Other Fields"])
+
+    print("Table 3.5 / Figure 3.5 — Language Proficiency (CEFR)")
+    t = freq_table(df["cefr_level"], order=["C1-C2", "B1-B2"])
+    save_table(t, "table_3_5_cefr_level")
+    pie(df["cefr_level"], "Language Proficiency Level (CEFR) (N=32)", "figure_3_5_cefr_level",
+        order=["C1-C2", "B1-B2"])
+
+    print("Table 3.6 / Figure 3.6 — Formal Translation Training / Professional Experience")
+    t = freq_table(df["formal_training_coded"], order=["No / Never", "Yes / Conditional"])
+    save_table(t, "table_3_6_formal_training")
+    bar(df["formal_training_coded"], "Formal Translation Training or Professional Experience (N=32)",
+        "Response", "figure_3_6_formal_training", order=["No / Never", "Yes / Conditional"])
+
+    print("Table 3.7 / Figure 3.7 — Prior Adoption of AI Translation Tools")
+    t = freq_table(df["ai_tool_ever_used"], order=["Yes", "Not very often"])
+    save_table(t, "table_3_7_ai_tool_adoption")
+    pie(df["ai_tool_ever_used"], "Prior Adoption of AI Translation Tools (N=32)",
+        "figure_3_7_ai_tool_adoption", order=["Yes", "Not very often"])
+
+    print("Table 3.8 / Figure 3.8 — Frequency of AI Translation Tool Use")
+    t = freq_table(df["ai_use_frequency"], order=["Sometimes", "Always"])
+    save_table(t, "table_3_8_ai_use_frequency")
+    pie(df["ai_use_frequency"].dropna(), "Frequency of AI Translation Tool Use (N=32)",
+        "figure_3_8_ai_use_frequency", order=["Sometimes", "Always"])
+
+    print("Table 3.9 / Figure 3.9 — Prior Interaction with Paid/Human Translation Services")
+    t = freq_table(df["human_service_ever_used"], order=["No", "Yes"])
+    save_table(t, "table_3_9_human_service_use")
+    pie(df["human_service_ever_used"].dropna(), "Prior Interaction with Paid or Human Translation Services (N=32)",
+        "figure_3_9_human_service_use", order=["No", "Yes"])
+
+    print("Table 3.10 / Figure 3.10 — Perceived AI Accuracy (1-10)")
+    t = freq_table(df["accuracy_score_1_10"], order=list(range(1, 11)))
+    save_table(t, "table_3_10_accuracy_score")
+    bar(df["accuracy_score_1_10"], "Perceived AI Accuracy Relative to Human Translation (Scale 1-10, N=32)",
+        "Score", "figure_3_10_accuracy_score", order=list(range(1, 11)))
+
+    print("Table 3.11 / Figure 3.11 — General Satisfaction (1-5)")
+    t = freq_table(df["satisfaction_score_1_5"], order=list(range(1, 6)))
+    save_table(t, "table_3_11_satisfaction_score")
+    bar(df["satisfaction_score_1_5"], "General Satisfaction with AI vs. Human Translation (Scale 1-5, N=32)",
+        "Score", "figure_3_11_satisfaction_score", order=list(range(1, 6)))
+
+    # Summary stats used in the Discussion (mean/mode)
+    print("\nSummary statistics:")
+    acc = df["accuracy_score_1_10"]
+    sat = df["satisfaction_score_1_5"]
+    print(f"  Accuracy (1-10):    mean={acc.mean():.2f}, median={acc.median():.1f}, mode={acc.mode().iloc[0]}")
+    print(f"  Satisfaction (1-5): mean={sat.mean():.2f}, median={sat.median():.1f}, mode={sat.mode().iloc[0]}")
+
+
+if __name__ == "__main__":
+    main()
