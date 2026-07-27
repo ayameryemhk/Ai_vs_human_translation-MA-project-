@@ -1,0 +1,78 @@
+# Thematic Coding — Open-Ended Responses
+
+This document records the coding scheme applied to the six open-ended questionnaire
+items (Q11, Q13, Q14, Q16, Q17, Q18; see `docs/questionnaire.pdf`) during the
+qualitative analysis in Chapter 3 of the dissertation. Coding followed Braun & Clarke's
+thematic analysis process: familiarization, initial coding, theme development, and
+review, applied manually to the 32 free-text responses in
+`data/processed/survey_responses_clean.csv`.
+
+Three principal themes were identified, consistent with Section 3.3 of the dissertation.
+
+---
+
+## Theme A — Speed vs. Contextual Fidelity
+**Source items:** Q11 (preference + why), Q13 (speed), Q14 (context/idioms)
+
+| Code | Description | Approx. respondents citing it |
+|---|---|---|
+| `speed_ai` | AI praised chiefly for speed/convenience, often in short, low-elaboration justifications | ~12 |
+| `context_human` | Human translation praised for handling context, emotion, or cultural nuance | ~14 |
+| `literal_ai_weakness` | AI criticized for word-for-word / literal handling of idioms or figurative language | ~8 |
+| `task_dependent` | Preference framed as conditional on text type (e.g., "poetic vs. scientific") | ~3 |
+
+**Pattern:** Respondents preferring AI justified this almost entirely in terms of speed
+and accessibility, with minimal reference to translation quality. Respondents preferring
+human translation gave longer, more elaborated justifications built around context,
+emotion, and cultural understanding, and frequently acknowledged AI's speed advantage
+even while rejecting it as a full substitute — i.e., praise and critique co-occurred within
+the same response rather than defining opposed camps.
+
+---
+
+## Theme B — Premium Cost vs. Cost-Free Efficiency
+**Source item:** Q16 (willingness to pay for human translation + why)
+
+| Code | Description |
+|---|---|
+| `wtp_no_sufficient` | Declines to pay: AI is "good enough" / free / already meets their needs |
+| `wtp_yes_accuracy` | Willing to pay: human translation is more accurate / natural / trustworthy |
+| `wtp_yes_stakes` | Willing to pay: conditional on high-stakes context (official documents, conferences, diplomas) |
+| `wtp_yes_scarcity` | Willing to pay: anticipates human translation becoming a scarce/premium skill as AI expands |
+| `wtp_ambivalent` | "Maybe" / "if necessary" — conditional, non-committal |
+
+**Pattern:** Willingness to pay clusters around perceived stakes — respondents were far
+more willing to pay for human translation for official, professional, or emotionally
+significant content than for everyday use, where free AI tools were seen as sufficient.
+
+---
+
+## Theme C — Structural Recommendations for AI Translation Software
+**Source item:** Q17 (suggested improvements)
+
+| Code | Description | Approx. respondents citing it |
+|---|---|---|
+| `whole_text_not_word` | Wants translation of overall meaning, not word-by-word decoding | ~5 |
+| `context_awareness` | Wants improved context/idiom/cultural-nuance handling | ~7 |
+| `emotional_tone` | Wants recognition of emotional tone / less "robotic" output | ~3 |
+| `dialect_language_coverage` | Wants broader language/dialect coverage | ~2 |
+| `satisfied_no_change` | Considers current AI translation sufficient ("flawless") | 1 |
+
+**Pattern:** The dominant, recurring diagnosis is that AI translation processes text at
+the word or phrase level rather than the level of overall meaning — this single critique
+underlies most of the concrete suggestions offered (context awareness, idiom handling,
+tone, cultural nuance).
+
+---
+
+## Notes on method
+
+- Coding was performed manually on the full free-text corpus (32 responses × 6 open
+  items = up to 192 text cells, many blank/non-substantive).
+- No formal inter-rater reliability statistic was computed (single-coder analysis), which
+  is noted as a limitation in Chapter 3.5 of the dissertation and should be disclosed if
+  this coding scheme is reused or extended.
+- This file documents the *coding categories*, not verbatim transcriptions of every
+  response; see `data/processed/survey_responses_clean.csv` for the full original
+  free-text answers (already anonymized — no names or identifying data were ever
+  collected in the Google Form).
