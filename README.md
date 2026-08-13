@@ -49,7 +49,7 @@ rather than a replacement.
 
 ---
 
-## 🛠️ Methodology
+## Methodology
 
 - **Design:** Mixed-methods case study- a single structured questionnaire (Google Forms) combining closed- and open-ended items.
 - **Participants:** N = 32, non-probability convenience sample. 87.50% Master's students (9.38% Licence, 3.12% PhD); 75.00% Linguistics and Applied Languages, 9.38% Literature and Civilization, 15.62% other fields; 87.50% female, 12.50% male; 96.88% aged 20–27; self-reported CEFR split 53.12% C1–C2 / 46.88% B1–B2; 81.25% with no formal translation training or professional experience.
