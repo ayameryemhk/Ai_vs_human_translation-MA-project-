@@ -14,6 +14,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
+from pandas.api.types import is_string_dtype
 
 IN_PATH = "data/processed/survey_responses_clean.csv"
 TABLES_DIR = "results/tables"
@@ -24,12 +25,18 @@ COLORS = ["#4C72B0", "#DD8452", "#55A868", "#C44E52", "#8172B2", "#937860"]
 
 
 def freq_table(series: pd.Series, order=None) -> pd.DataFrame:
+    """Frequency table. Percentages use ALL respondents (N = 32) as the base,
+    and missing answers appear in their own row, as in the dissertation tables."""
     counts = series.value_counts(dropna=True)
     if order:
         counts = counts.reindex(order).dropna()
-    pct = (counts / counts.sum() * 100).round(2)
-    out = pd.DataFrame({"Frequency": counts.astype(int), "Percentage": pct})
-    out.loc["Total"] = [int(counts.sum()), 100.00]
+    total = len(series)                      # all respondents, including missing answers
+    missing = total - int(counts.sum())      # how many did not answer
+    out = pd.DataFrame({"Frequency": counts.astype(int)})
+    if missing > 0:
+        out.loc["Missing Response"] = [missing]
+    out["Percentage"] = (out["Frequency"] / total * 100).round(2)
+    out.loc["Total"] = [total, 100.00]
     return out
 
 
@@ -82,6 +89,16 @@ def main() -> None:
     df = pd.read_csv(IN_PATH)
     print(f"Loaded {len(df)} responses\n")
 
+    # Remove spaces at the start/end of text answers. Without this, "Not very often "
+    # (with a trailing space) was not recognised and was silently dropped from Table 3.7.
+    for column in df.columns:
+        if is_string_dtype(df[column]):      # only text columns
+            df[column] = df[column].str.strip()
+
+    # In the cleaned file, a missing training answer is written as the word "Missing".
+    # Turn it into a real missing value so that freq_table() can count it.
+    df["formal_training_coded"] = df["formal_training_coded"].replace("Missing", pd.NA)
+
     print("Table 3.1 / Figure 3.1 — Age Distribution")
     t = freq_table(df["age_group"], order=["Under 20 years", "20-27 years", "over 27 years"])
     save_table(t, "table_3_1_age_distribution")
@@ -116,8 +133,14 @@ def main() -> None:
     print("Table 3.6 / Figure 3.6 — Formal Translation Training / Professional Experience")
     t = freq_table(df["formal_training_coded"], order=["No / Never", "Yes / Conditional"])
     save_table(t, "table_3_6_formal_training")
-    bar(df["formal_training_coded"], "Formal Translation Training or Professional Experience (N=32)",
-        "Response", "figure_3_6_formal_training", order=["No / Never", "Yes / Conditional"])
+    # NOTE: the dissertation's Table 3.6 reports 26 "No / Never" and 6 "Yes / Conditional".
+    # This script gives 27 / 3 plus 2 missing answers. The free-text answers do not allow
+    # me to reproduce 26 / 6 with a rule I can justify, so this table has to be checked
+    # against the thesis coding before it is quoted. See README, "Known differences".
+    bar(df["formal_training_coded"].fillna("Missing Response"),
+        "Formal Translation Training or Professional Experience (N=32)",
+        "Response", "figure_3_6_formal_training",
+        order=["No / Never", "Yes / Conditional", "Missing Response"])
 
     print("Table 3.7 / Figure 3.7 — Prior Adoption of AI Translation Tools")
     t = freq_table(df["ai_tool_ever_used"], order=["Yes", "Not very often"])
@@ -128,14 +151,14 @@ def main() -> None:
     print("Table 3.8 / Figure 3.8 — Frequency of AI Translation Tool Use")
     t = freq_table(df["ai_use_frequency"], order=["Sometimes", "Always"])
     save_table(t, "table_3_8_ai_use_frequency")
-    pie(df["ai_use_frequency"].dropna(), "Frequency of AI Translation Tool Use (N=32)",
-        "figure_3_8_ai_use_frequency", order=["Sometimes", "Always"])
+    pie(df["ai_use_frequency"].fillna("Missing Response"), "Frequency of AI Translation Tool Use (N=32)",
+        "figure_3_8_ai_use_frequency", order=["Sometimes", "Always", "Missing Response"])
 
     print("Table 3.9 / Figure 3.9 — Prior Interaction with Paid/Human Translation Services")
     t = freq_table(df["human_service_ever_used"], order=["No", "Yes"])
     save_table(t, "table_3_9_human_service_use")
-    pie(df["human_service_ever_used"].dropna(), "Prior Interaction with Paid or Human Translation Services (N=32)",
-        "figure_3_9_human_service_use", order=["No", "Yes"])
+    pie(df["human_service_ever_used"].fillna("Missing Response"), "Prior Interaction with Paid or Human Translation Services (N=32)",
+        "figure_3_9_human_service_use", order=["No", "Yes", "Missing Response"])
 
     print("Table 3.10 / Figure 3.10 — Perceived AI Accuracy (1-10)")
     t = freq_table(df["accuracy_score_1_10"], order=list(range(1, 11)))
