@@ -68,34 +68,60 @@ rather than a replacement.
 ├── requirements.txt
 ├── data/
 │   ├── raw/
-│   │   └── survey_responses_raw.xlsx        # Unmodified Google Forms export (N=32)
+│   │   └── survey_responses_raw.csv         # Unmodified Google Forms export (N=32)
 │   ├── processed/
-│   │   └── survey_responses_clean.csv       # Renamed/coded columns, ready for analysis
+│   │   ├── survey_responses_clean.csv       # Dissertation version: renamed/coded columns
+│   │   ├── survey_notebook_clean.csv|xlsx   # Output of Notebook 1 (cleaned)
+│   │   └── survey_notebook_coded.csv        # Output of Notebook 2 (coded variables added)
 │   └── README.md                            # Full variable dictionary
-├── analysis/
-│   ├── 01_clean_data.py                     # Raw xlsx -> coded, anonymized CSV
-│   ├── 02_descriptive_stats.py              # Reproduces Tables & Figures 3.1-3.11
+├── analysis/                                # Scripts behind the dissertation's Chapter 3
+│   ├── 01_clean_data.py
+│   ├── 02_descriptive_stats.py              # Tables & Figures 3.1-3.11
 │   └── 03_thematic_coding.md                # Coding scheme for the 6 open-ended items
+├── notebooks/                               # Step-by-step Python data analysis (learning portfolio)
+│   ├── 01_data_inspection_and_cleaning.ipynb
+│   ├── 02_data_transformation.ipynb
+│   └── 03_exploratory_analysis.ipynb
 ├── results/
-│   ├── figures/                             # figure_3_1 ... figure_3_11 (PNG)
-│   └── tables/                              # table_3_1 ... table_3_11 (CSV)
+│   ├── figures/                             # figure_3_1 ... figure_3_11 (dissertation)
+│   ├── tables/                              # table_3_1 ... table_3_11 (dissertation)
+│   └── exploration/                         # extra tables and figures from the notebooks
 └── docs/
     ├── dissertation.pdf
-    └── questionnaire.pdf                    # Appendix A — full instrument
+    └── questionnaire.pdf                    # Appendix A - full instrument
 ```
 
 ### Reproducing the results
 
 ```bash
 pip install -r requirements.txt
-cd analysis
-python 01_clean_data.py
-python 02_descriptive_stats.py
+python analysis/02_descriptive_stats.py      # run from the repository root
 ```
 
-This regenerates every table and figure in `results/` directly from the raw Google
-Forms export, exactly matching Tables 3.1–3.11 and Figures 3.1–3.11 of the
-dissertation.
+The dissertation scripts in `analysis/` use paths relative to the repository root, so run them from there.
+
+### Python data-analysis notebooks (added after the dissertation)
+
+The three notebooks in `notebooks/` repeat and extend the analysis in a step-by-step, explained way,
+starting directly from the raw Google Forms export (`data/raw/survey_responses_raw.csv`).
+They are a practical record of the data-analysis skills used on this dataset (Python, Pandas, NumPy, Matplotlib).
+They do **not** replace the dissertation's tables, which remain the official results.
+
+| Notebook | Content |
+|---|---|
+| `01_data_inspection_and_cleaning` | import, inspection, missing values, duplicates, inconsistent answers, renaming, cleaning, filtering, export |
+| `02_data_transformation` | coding open-text answers, new columns, NumPy statistics, boolean masks, `groupby`, `crosstab`, `pivot_table` |
+| `03_exploratory_analysis` | frequency tables, descriptive statistics, group comparisons, correlations, charts; outputs in `results/exploration/` |
+
+Run them in order with `jupyter notebook` from the `notebooks/` folder.
+
+### Known differences between the script output and the dissertation
+
+- **Table 3.6 (formal training):** the dissertation reports 26 "No / Never" and 6 "Yes / Conditional". The script gives
+  27 "No / Never", 3 "Yes / Conditional" and 2 missing answers (R01, R08). The free-text answers do not show which
+  respondents the dissertation counted differently, so this table must be checked against the original coding before it is quoted.
+- Tables 3.7 to 3.9 previously dropped the "Not very often" answer and the missing answers and recalculated percentages on 30 or 31 people.
+  This was caused by a trailing space in `Not very often ` and by the denominator. Both are corrected in `analysis/02_descriptive_stats.py`.
 
 ---
 
@@ -117,3 +143,4 @@ dissertation.
 - Jakobson, R. (1959/2004). On Linguistic Aspects of Translation.
 - Newmark, P. *A Textbook of Translation.*
 - (Full list in dissertation, Bibliography, pp. 77–78)
+ibliography, pp. 77–78)
