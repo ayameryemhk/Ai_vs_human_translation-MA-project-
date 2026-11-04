@@ -40,9 +40,9 @@ Chapter 2.5 of the dissertation.
 ## Reproducing the dissertation's tables/figures
 
 ```bash
-pip install -r ../requirements.txt
-python 01_clean_data.py            # writes data/processed/survey_responses_clean.csv
-python 02_descriptive_stats.py     # writes results/tables/*.csv and results/figures/*.png
+pip install -r requirements.txt
+python analysis/01_clean_data.py          # run from the repository root
+python analysis/02_descriptive_stats.py   # writes results/tables/*.csv and results/figures/*.png
 ```
 
 All eleven closed-item frequency tables (3.1–3.11) and their corresponding charts
